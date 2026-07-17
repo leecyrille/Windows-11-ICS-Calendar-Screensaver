@@ -18,7 +18,7 @@
   --badge-text: #06101f;
   --warn: #e0af68;
   --danger: #f7768e;
-  --bar-mix: rgba(13, 17, 23, 0.4);   /* all-day bars blend the feed color into this */
+  --bar-mix: #151b24;   /* all-day bars blend the feed color into this (opaque: segments overlap) */
   --bar-text: #e6edf3;
   --time-mix: #ffffff;                /* chip time = feed color mixed toward this */
   --photos-bg: #05070a;
@@ -43,7 +43,7 @@ html.light {
   --badge-text: #ffffff;
   --warn: #9a6700;
   --danger: #d1242f;
-  --bar-mix: rgba(255, 255, 255, 0.55);
+  --bar-mix: #ffffff;
   --bar-text: #24292f;
   --time-mix: #1f2328;
   --photos-bg: #dfe3e8;
@@ -275,6 +275,18 @@ html, body {
   font-weight: 440;
 }
 
+/* spanning bars — segments join across cells into one continuous Google-style bar */
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16em;
+  font-size: calc(var(--ev-fs) * var(--scale));
+  line-height: 1.28;
+  flex: none;
+  position: relative;
+  z-index: 1;              /* paint over the neighbouring cell's padding + hairline */
+  margin-bottom: 0.16em;
+}
 .bar {
   padding: 0.13em 0.5em 0.16em 0.5em;
   border-radius: 0.3em;
@@ -286,6 +298,21 @@ html, body {
   text-overflow: ellipsis;
   flex: none;
 }
+/* bleed over the cell padding and 1px hairline so adjacent segments touch */
+.bar.cont-left {
+  margin-left: calc(-0.42vw - 1.5px);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.bar.cont-right {
+  margin-right: calc(-0.42vw - 1.5px);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+/* span continues into the previous/next week row: square edge, no bleed */
+.bar.sq-left { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.bar.sq-right { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.bar.spacer { visibility: hidden; }
 
 /* ---------- footer / status ---------- */
 

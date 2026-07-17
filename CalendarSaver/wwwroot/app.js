@@ -57,47 +57,75 @@ function monthModel(year, month /* 1-12 */) {
 }
 
 function indexEvents(data) {
-  const byDay = new Map();
-  const bucket = (k) => {
-    if (!byDay.has(k)) byDay.set(k, { allday: [], timed: [] });
-    return byDay.get(k);
+  const chipsByDay = new Map();
+  const spans = []; // all-day and 24h+ timed events, rendered as continuous bars
+  const chip = (k, item) => {
+    if (!chipsByDay.has(k)) chipsByDay.set(k, []);
+    chipsByDay.get(k).push(item);
   };
   for (const ev of data.events) {
     const color = (data.feeds[ev.feed] && data.feeds[ev.feed].color) || '#7aa2f7';
     if (ev.allDay) {
       const start = parseDateOnly(ev.start);
-      const end = parseDateOnly(ev.end);
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        bucket(dateKey(d)).allday.push({ title: ev.title, color, sort: start.getTime() });
-      }
+      spans.push({ start, end: parseDateOnly(ev.end), title: ev.title, color, sort: start.getTime() });
     } else {
       const start = new Date(ev.start);
       const end = new Date(ev.end || ev.start);
       // Timed events lasting a day or more (e.g. week-long events entered with times)
-      // render as spanning bars; short events that merely cross midnight stay chips.
+      // become spanning bars; short events that merely cross midnight stay chips.
       if (end - start >= 24 * 3600 * 1000) {
         const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
         const lastDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
         if (end.getHours() === 0 && end.getMinutes() === 0) lastDay.setDate(lastDay.getDate() - 1);
-        for (let d = new Date(startDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
-          const first = +d === +startDay;
-          bucket(dateKey(d)).allday.push({
-            title: first ? `${fmtTime(start)} ${ev.title}` : ev.title,
-            color, sort: start.getTime(),
-          });
-        }
-      } else {
-        bucket(dateKey(start)).timed.push({
-          title: ev.title, color, time: fmtTime(start), sort: start.getTime(),
+        spans.push({
+          start: startDay, end: lastDay,
+          title: `${fmtTime(start)} ${ev.title}`, color, sort: start.getTime(),
         });
+      } else {
+        chip(dateKey(start), { title: ev.title, color, time: fmtTime(start), sort: start.getTime() });
       }
     }
   }
-  for (const day of byDay.values()) {
-    day.allday.sort((a, b) => a.sort - b.sort || a.title.localeCompare(b.title));
-    day.timed.sort((a, b) => a.sort - b.sort || a.title.localeCompare(b.title));
+  for (const list of chipsByDay.values()) {
+    list.sort((a, b) => a.sort - b.sort || a.title.localeCompare(b.title));
   }
-  return byDay;
+  return { chipsByDay, spans };
+}
+
+/* For each week row, give every span segment a stable lane (Google Calendar style):
+   a bar keeps its vertical slot for the whole week, and freed slots are padded with
+   invisible spacers so bars never jump lanes mid-span. */
+function layoutWeekSegments(spans, days, weeks) {
+  const DAY = 86400000;
+  const weekSegs = [];
+  for (let w = 0; w < weeks; w++) {
+    const rowStart = days[w * 7];
+    const rowEnd = days[w * 7 + 6];
+    const segs = [];
+    for (const sp of spans) {
+      if (sp.end < rowStart || sp.start > rowEnd) continue;
+      segs.push({
+        sp,
+        fromCol: Math.max(0, Math.round((sp.start - rowStart) / DAY)),
+        toCol: Math.min(6, Math.round((sp.end - rowStart) / DAY)),
+        startsHere: sp.start >= rowStart,
+        endsHere: sp.end <= rowEnd,
+        lane: 0,
+      });
+    }
+    segs.sort((a, b) => a.fromCol - b.fromCol ||
+      (b.toCol - b.fromCol) - (a.toCol - a.fromCol) ||
+      a.sp.title.localeCompare(b.sp.title));
+    const laneEnds = [];
+    for (const seg of segs) {
+      let lane = 0;
+      while (laneEnds[lane] !== undefined && laneEnds[lane] >= seg.fromCol) lane++;
+      laneEnds[lane] = seg.toCol;
+      seg.lane = lane;
+    }
+    weekSegs.push(segs);
+  }
+  return weekSegs;
 }
 
 function render() {
@@ -136,7 +164,8 @@ function render() {
 
   // grid
   const { days, weeks } = monthModel(year, month);
-  const byDay = indexEvents(payload);
+  const { chipsByDay, spans } = indexEvents(payload);
+  const weekSegs = layoutWeekSegments(spans, days, weeks);
   const grid = document.getElementById('grid');
   grid.textContent = '';
   grid.style.gridTemplateRows = `repeat(${weeks}, minmax(0, 1fr))`;
@@ -145,6 +174,7 @@ function render() {
   days.forEach((d, i) => {
     const key = dateKey(d);
     const cell = el('div', 'cell');
+    const w = Math.floor(i / 7);
     const col = i % 7;
     if (col >= 5) cell.classList.add('weekend');
     if (d.getMonth() !== month - 1) cell.classList.add('out');
@@ -154,15 +184,37 @@ function render() {
     head.append(el('div', 'day-num', String(d.getDate())));
     cell.append(head);
 
-    const events = el('div', 'events');
-    const day = byDay.get(key);
-    if (day) {
-      for (const bar of day.allday) {
-        const node = el('div', 'bar', bar.title);
-        node.style.setProperty('--c', bar.color);
-        events.append(node);
+    // spanning bars: one visually-continuous bar per event across the week row
+    const cellSegs = weekSegs[w].filter((s) => s.fromCol <= col && col <= s.toCol);
+    if (cellSegs.length) {
+      const bars = el('div', 'bars');
+      const maxLane = Math.max(...cellSegs.map((s) => s.lane));
+      for (let lane = 0; lane <= maxLane; lane++) {
+        const seg = cellSegs.find((s) => s.lane === lane);
+        if (!seg) {
+          bars.append(el('div', 'bar spacer', ' '));
+          continue;
+        }
+        const bar = el('div', 'bar');
+        bar.style.setProperty('--c', seg.sp.color);
+        if (col === seg.fromCol) {
+          bar.textContent = seg.sp.title;         // title once per week row
+          if (!seg.startsHere) bar.classList.add('sq-left');
+        } else {
+          bar.textContent = ' ';
+          bar.classList.add('cont-left');
+        }
+        if (col < seg.toCol) bar.classList.add('cont-right');
+        else if (!seg.endsHere) bar.classList.add('sq-right');
+        bars.append(bar);
       }
-      for (const chip of day.timed) {
+      cell.append(bars);
+    }
+
+    const events = el('div', 'events');
+    const chips = chipsByDay.get(key);
+    if (chips) {
+      for (const chip of chips) {
         const node = el('div', 'chip');
         node.style.setProperty('--c', chip.color);
         node.append(el('span', 't', chip.time));
@@ -187,8 +239,10 @@ function render() {
 /* ---------- auto-scale so the busiest day still shows every event ---------- */
 
 function overflows() {
-  for (const node of document.querySelectorAll('.cell .events')) {
-    if (node.scrollHeight > node.clientHeight + 1) return true;
+  for (const cell of document.querySelectorAll('#grid .cell')) {
+    if (cell.scrollHeight > cell.clientHeight + 1) return true; // bars + chips together
+    const events = cell.querySelector('.events');
+    if (events && events.scrollHeight > events.clientHeight + 1) return true;
   }
   return false;
 }
