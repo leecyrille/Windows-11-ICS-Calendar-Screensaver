@@ -72,9 +72,25 @@ function indexEvents(data) {
       }
     } else {
       const start = new Date(ev.start);
-      bucket(dateKey(start)).timed.push({
-        title: ev.title, color, time: fmtTime(start), sort: start.getTime(),
-      });
+      const end = new Date(ev.end || ev.start);
+      // Timed events lasting a day or more (e.g. week-long events entered with times)
+      // render as spanning bars; short events that merely cross midnight stay chips.
+      if (end - start >= 24 * 3600 * 1000) {
+        const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const lastDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+        if (end.getHours() === 0 && end.getMinutes() === 0) lastDay.setDate(lastDay.getDate() - 1);
+        for (let d = new Date(startDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+          const first = +d === +startDay;
+          bucket(dateKey(d)).allday.push({
+            title: first ? `${fmtTime(start)} ${ev.title}` : ev.title,
+            color, sort: start.getTime(),
+          });
+        }
+      } else {
+        bucket(dateKey(start)).timed.push({
+          title: ev.title, color, time: fmtTime(start), sort: start.getTime(),
+        });
+      }
     }
   }
   for (const day of byDay.values()) {
