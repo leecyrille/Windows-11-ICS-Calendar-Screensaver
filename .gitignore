@@ -2,6 +2,8 @@
 bin/
 obj/
 *.scr
+# ...except the released screensaver itself
+!PactoTechCalendarSaver.scr
 
 # user/local state
 *.user
