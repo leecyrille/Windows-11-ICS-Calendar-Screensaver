@@ -1,0 +1,8 @@
+# build outputs
+bin/
+obj/
+*.scr
+
+# user/local state
+*.user
+.vs/
