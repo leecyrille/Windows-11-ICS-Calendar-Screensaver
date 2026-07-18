@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendar Saver — Free Windows Calendar Screensaver for Your Family Wall Calendar</title>
+<meta name="description" content="Free Windows 11 screensaver that turns any monitor into a family wall calendar — every event from your Google, Outlook, or iCloud calendars visible from across the room. Open source, no account, no subscription.">
+<link rel="canonical" href="https://calendar-saver.pages.dev/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://calendar-saver.pages.dev/">
+<meta property="og:title" content="Calendar Saver — Free Windows Calendar Screensaver">
+<meta property="og:description" content="Turn any Windows PC into a family wall calendar. Month view from all your calendars, tasks, photo slideshow — free and open source.">
+<meta property="og:image" content="https://calendar-saver.pages.dev/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"PactoTech Calendar Saver","url":"https://calendar-saver.pages.dev/","description":"Free Windows 11 screensaver that displays a full-month family wall calendar aggregated from ICS feeds (Google Calendar, Outlook, iCloud), with a task list and photo slideshow.","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows 11","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/leecyrille/Windows-11-ICS-Calendar-Screensaver","creator":{"@type":"Organization","name":"Pacto Tech","url":"https://pactotech.com/"}}
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E">
+<style>
+  :root{ /* Linen & Eucalyptus — Pacto Tech family style */
+    --bg:#F6F3EC; --panel:#FFFFFF; --panel2:#FAF8F2; --ink:#34322C; --muted:#7E786B;
+    --line:#E8E3D8; --line2:#D9D3C5; --sage:#7E8C74; --sage-deep:#556049; --sage-soft:#EEF0E7;
+    --terra:#3B3A34; --terra-deep:#26251F;
+    --shadow:0 1px 2px rgba(52,50,44,.04), 0 10px 28px -14px rgba(52,50,44,.16);
+    --serif:ui-serif,'Iowan Old Style',Georgia,'Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'Cascadia Code',Consolas,'SF Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{ background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.5 }
+  body::after{
+    content:""; position:fixed; inset:0; pointer-events:none; opacity:.035; mix-blend-mode:multiply; z-index:60;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  a{ color:var(--sage-deep) }
+  .wrap{ max-width:1060px; margin:0 auto; padding:0 24px }
+
+  header.site{ display:flex; align-items:center; gap:16px; padding:26px 0 8px }
+  .mark{ width:52px; height:52px; color:var(--sage-deep); flex:none }
+  h1{ margin:0; font-family:var(--serif); font-weight:500; font-size:30px; letter-spacing:.02em }
+  h1 em{ font-style:italic; color:var(--sage-deep) }
+  .tagline{ margin:2px 0 0; color:var(--muted); font-size:14.5px; max-width:64ch }
+
+  .hero{ display:grid; grid-template-columns:300px 1fr; gap:22px; align-items:start; margin-top:18px }
+  .heropanel{ background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:18px; display:flex; flex-direction:column; gap:12px }
+  .btn{
+    display:block; text-align:center; border:0; border-radius:11px; padding:13px 16px; cursor:pointer; text-decoration:none;
+    background:linear-gradient(180deg, var(--terra), var(--terra-deep)); color:#F5F2EB;
+    font:700 15.5px var(--sans); letter-spacing:.02em;
+    box-shadow:0 2px 4px rgba(38,37,31,.18), 0 8px 20px -8px rgba(38,37,31,.32);
+    transition:transform .12s, filter .12s;
+  }
+  .btn:hover{ transform:translateY(-1px); filter:brightness(1.1) }
+  .subnote{ margin:0; text-align:center; color:var(--muted); font-size:12px; line-height:1.5 }
+  .ghlink{ text-align:center; font-size:12.5px }
+  .shots{ border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow); background:var(--panel) }
+  .shots img{ display:block; width:100%; height:auto }
+  .shotrow{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px }
+  .shotrow figure{ margin:0; background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow) }
+  .shotrow img{ display:block; width:100%; height:auto }
+  .shotrow figcaption{ padding:8px 12px; font-size:12px; color:var(--muted) }
+
+  section{ margin-top:34px }
+  h2{ font-family:var(--serif); font-weight:500; font-size:22px; margin:0 0 4px; letter-spacing:.02em }
+  .sectionsub{ margin:0 0 16px; color:var(--muted); font-size:13.5px }
+
+  .grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px }
+  .feature{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 15px; box-shadow:var(--shadow) }
+  .feature b{ display:block; font-size:14px; margin-bottom:3px; color:var(--sage-deep) }
+  .feature p{ margin:0; font-size:13px; color:var(--muted); line-height:1.5 }
+
+  .steps{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; counter-reset:step }
+  .step{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 15px; box-shadow:var(--shadow); position:relative }
+  .step::before{ counter-increment:step; content:counter(step); position:absolute; top:12px; right:14px;
+    font:600 13px var(--mono); color:#fff; background:var(--sage); border-radius:999px; width:22px; height:22px; display:grid; place-items:center }
+  .step b{ display:block; font-size:14px; margin-bottom:3px; padding-right:26px }
+  .step p{ margin:0; font-size:13px; color:var(--muted); line-height:1.5 }
+  .step code{ font:500 11.5px var(--mono); background:var(--panel2); border:1px solid var(--line); border-radius:5px; padding:1px 5px }
+
+  .skylight{ background:var(--panel2); border:1px solid var(--line); border-radius:16px; padding:20px 20px 16px; box-shadow:var(--shadow) }
+  .skylight .intro{ max-width:78ch; font-size:13.5px; color:var(--muted); margin:0 0 16px }
+  .skylight .intro b{ color:var(--ink) }
+  .skycards{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px }
+  .skycard{
+    display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; padding:16px 14px 14px;
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; text-decoration:none; color:var(--ink);
+    transition:border-color .15s, transform .12s;
+  }
+  .skycard:hover{ border-color:var(--sage); transform:translateY(-1px) }
+  .skyart{ color:var(--sage-deep); height:84px; display:flex; align-items:flex-end }
+  .skycard b{ font-size:14px }
+  .skycard .why{ font-size:12px; color:var(--muted); line-height:1.45; min-height:3.6em }
+  .skycard em{ font-style:normal; color:var(--terra); font-weight:600; font-size:12px }
+  .disclosure{ margin:12px 0 0; font-size:11.5px; color:var(--muted); text-align:center }
+
+  .about{ margin-top:30px }
+  .about details{ color:var(--muted); font-size:12.5px; line-height:1.55 }
+  .about summary{ cursor:pointer; font-weight:600; font-size:12.5px; user-select:none }
+  .about summary:hover{ color:var(--ink) }
+  .about p{ margin:8px 0 0; max-width:78ch }
+  .about b{ color:var(--ink) }
+
+  footer{ margin-top:26px; padding:14px 0 22px; color:var(--muted); font-size:12px; display:flex; gap:18px; flex-wrap:wrap; border-top:1px solid var(--line) }
+  footer a{ color:var(--sage-deep); font-weight:600; text-decoration:none }
+  footer a:hover{ text-decoration:underline }
+
+  .tipcard{
+    display:block; text-align:center; padding:12px; font-size:13.5px; margin-top:14px;
+    background:var(--sage-soft); border:1px solid var(--line); border-radius:11px;
+    color:var(--ink); text-decoration:none; transition:border-color .15s, transform .12s;
+  }
+  .tipcard:hover{ border-color:var(--sage); transform:translateY(-1px) }
+  .tipcard b{ color:var(--sage-deep) }
+
+  @media (max-width:900px){
+    .hero{ grid-template-columns:1fr }
+    .grid, .steps, .skycards{ grid-template-columns:1fr 1fr }
+  }
+  @media (max-width:600px){
+    .grid, .steps, .skycards, .shotrow{ grid-template-columns:1fr }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <svg class="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="6" y="10" width="52" height="36" rx="4"/>
+    <path d="M26 54 h12 M22 54 c4-3 4-8 4-8 m12 8 c-4-3-4-8-4-8"/>
+    <path d="M6 20 h52" opacity=".6"/>
+    <path d="M19 10 v-4 M45 10 v-4" stroke-width="3"/>
+    <path d="M14 27 h8 M27 27 h8 M40 27 h8 M14 34 h8 M27 34 h8 M40 34 h8 M14 41 h8" opacity=".45"/>
+    <circle cx="44" cy="40" r="1.6" fill="currentColor" stroke="none"/>
+  </svg>
+  <div>
+    <h1>Calendar <em>Saver</em></h1>
+    <p class="tagline">A free Windows 11 screensaver that turns your monitor into a family wall calendar &mdash; every event from your Google, Outlook, or iCloud calendars, readable from across the room.</p>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="heropanel">
+    <a class="btn" href="https://github.com/leecyrille/Windows-11-ICS-Calendar-Screensaver/raw/main/PactoTechCalendarSaver.scr" rel="noopener">&#8681; Download Calendar Saver</a>
+    <p class="subnote">free &amp; open source &middot; Windows 11 &middot; no account, no subscription<br>download &rarr; right-click &rarr; <b>Install</b></p>
+    <a class="ghlink" href="https://github.com/leecyrille/Windows-11-ICS-Calendar-Screensaver" target="_blank" rel="noopener">view source on GitHub</a>
+    <a class="tipcard" href="https://pactotech.com/products/calendar-saver-tip-jar" target="_blank" rel="noopener">&#9749; Enjoying this free tool? <b>Leave a tip</b></a>
+  </div>
+  <div class="shots"><img src="calendar-dark.png" alt="Calendar Saver screensaver showing a full month family calendar in dark theme with colored events, a task list, and a photo collage" width="1920" height="1080"></div>
+</div>
+
+<section>
+  <h2>Everything on one screen</h2>
+  <p class="sectionsub">The monitor you already own becomes the family command center whenever it idles.</p>
+  <div class="grid">
+    <div class="feature"><b>All your calendars, one month view</b><p>Add any number of ICS feeds &mdash; Google, Outlook, iCloud, Nextcloud &mdash; each with its own name and color, with a legend on top.</p></div>
+    <div class="feature"><b>Every event is always visible</b><p>No &ldquo;+3 more&rdquo; hiding things. Text auto-scales so even the busiest day fits, readable from the kitchen doorway.</p></div>
+    <div class="feature"><b>Task list built in</b><p>To-dos from feeds that carry them, sorted by due date &mdash; overdue items highlighted so nothing slips.</p></div>
+    <div class="feature"><b>Photo slideshow collage</b><p>Point it at your photo folders and the side panel becomes a gently crossfading family photo wall.</p></div>
+    <div class="feature"><b>Light &amp; dark, on a schedule</b><p>Fixed theme, or light during the day and dark at night &mdash; it follows the hours you choose.</p></div>
+    <div class="feature"><b>Works offline</b><p>Feeds refresh on an interval and cache to disk. A dropped connection still shows the last good calendar.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Set up in three minutes</h2>
+  <div class="steps">
+    <div class="step"><b>Install the screensaver</b><p>Download, right-click the <code>.scr</code> file, choose <b>Install</b>. Self-contained &mdash; nothing else to install.</p></div>
+    <div class="step"><b>Select it in Windows</b><p>In Screen Saver Settings pick <b>PactoTechCalendarSaver</b>, then open <b>Settings&hellip;</b> to add calendars and photos.</p></div>
+    <div class="step"><b>Paste your calendar links</b><p>In Google Calendar: Settings and sharing &rarr; <b>Integrate calendar</b> &rarr; copy the <b>Secret address in iCal format</b>. The settings dialog walks you through it and live-tests every feed.</p></div>
+  </div>
+  <div class="shotrow">
+    <figure><img src="calendar-light.png" alt="Calendar Saver light theme showing the same month view with a white background" loading="lazy" width="1920" height="1080"><figcaption>The light theme &mdash; fixed, or automatically during daytime hours.</figcaption></figure>
+    <figure><img src="settings.png" alt="Calendar Saver settings dialog with calendar feed list, photo folders, and theme schedule" loading="lazy" width="712" height="632"><figcaption>Settings: feeds with names and colors, photo folders, refresh, and theme schedule.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <div class="skylight">
+    <h2>Prefer a dedicated display on the wall?</h2>
+    <p class="intro">This screensaver is the free way to get a family calendar on a screen you already own &mdash; but it sleeps when someone sits down at the PC. A <b>Skylight Calendar</b> is the appliance version of the same idea: a wall-mounted touchscreen that shows your family&rsquo;s schedule 24/7, syncs with Google, Apple, Outlook and Cozi, and adds chore charts and meal planning the kids can tap. If your family loves the screensaver, it&rsquo;s the natural upgrade. Three sizes:</p>
+    <div class="skycards">
+      <a class="skycard" href="https://www.amazon.com/dp/B0H37WG5F4?tag=flowerfrogmak-20" target="_blank" rel="noopener sponsored">
+        <span class="skyart"><svg width="64" height="56" viewBox="0 0 64 56" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="10" y="6" width="44" height="32" rx="3"/><path d="M10 14 h44" opacity=".5"/><path d="M17 21 h8 M30 21 h8 M17 28 h8 M30 28 h8 M43 21 h4 M43 28 h4" opacity=".4"/><path d="M24 38 l-6 12 h28 l-6-12" opacity=".8"/><path d="M14 50 h36"/></svg></span>
+        <b>Skylight Calendar Mini &middot; 10&Prime;</b>
+        <span class="why">Counter-top size for kitchen corners, desks, and entryway tables &mdash; the affordable way in.</span>
+        <em>view on Amazon &rarr;</em>
+      </a>
+      <a class="skycard" href="https://www.amazon.com/dp/B0G5ZX9WSW?tag=flowerfrogmak-20" target="_blank" rel="noopener sponsored">
+        <span class="skyart"><svg width="88" height="66" viewBox="0 0 88 66" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="6" y="6" width="76" height="52" rx="4"/><path d="M6 18 h76" opacity=".5"/><path d="M14 27 h10 M30 27 h10 M46 27 h10 M62 27 h10 M14 36 h10 M30 36 h10 M46 36 h10 M62 36 h10 M14 45 h10 M30 45 h10" opacity=".4"/><circle cx="66" cy="45" r="2" fill="currentColor" stroke="none"/></svg></span>
+        <b>Skylight Calendar 2 &middot; 15&Prime;</b>
+        <span class="why">The family favorite and a Wirecutter pick &mdash; 4.4&#9733; from 6,500+ households. Wall mount included.</span>
+        <em>view on Amazon &rarr;</em>
+      </a>
+      <a class="skycard" href="https://www.amazon.com/dp/B0F1WYX8J6?tag=flowerfrogmak-20" target="_blank" rel="noopener sponsored">
+        <span class="skyart"><svg width="110" height="82" viewBox="0 0 110 82" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="5" y="5" width="100" height="72" rx="5"/><path d="M5 19 h100" opacity=".5"/><path d="M13 29 h12 M31 29 h12 M49 29 h12 M67 29 h12 M85 29 h12 M13 40 h12 M31 40 h12 M49 40 h12 M67 40 h12 M85 40 h12 M13 51 h12 M31 51 h12 M49 51 h12 M13 62 h12 M31 62 h12" opacity=".4"/><circle cx="88" cy="58" r="2.4" fill="currentColor" stroke="none"/></svg></span>
+        <b>Skylight Calendar Max &middot; 27&Prime;</b>
+        <span class="why">The full command center for busy households &mdash; mounts portrait or landscape, readable across the kitchen.</span>
+        <em>view on Amazon &rarr;</em>
+      </a>
+    </div>
+    <p class="disclosure">As an Amazon Associate we earn from qualifying purchases.</p>
+  </div>
+</section>
+
+<section class="about">
+  <details>
+    <summary>What is a calendar screensaver? &mdash; and is this a free Skylight alternative?</summary>
+    <p>A <b>calendar screensaver</b> puts your family&rsquo;s schedule on a screen that would otherwise sit dark. Instead of bouncing logos, an idle Windows PC or a spare monitor shows a <b>full-month wall calendar</b>: school events, work meetings, birthdays, practices, and appointments from every calendar your family uses, color-coded by person or category, plus a task list and a rotating photo collage.</p>
+    <p>Calendar Saver works with any calendar that publishes an <b>ICS feed</b> &mdash; Google Calendar&rsquo;s secret iCal address, Outlook, iCloud, Nextcloud, and most others. Nothing leaves your machine: the screensaver fetches the feeds directly, caches them for offline viewing, and never asks for your account password. It is completely free, open source, and subscription-free.</p>
+    <p>People often find this tool while searching for a <b>free Skylight Calendar alternative</b> &mdash; and that&rsquo;s a fair description: same month-at-a-glance idea, using hardware you already own. The trade-off is that a screensaver yields the screen when someone uses the PC. Families who want an always-on, touch-first display in the hallway or kitchen eventually add a dedicated device like the Skylight Calendar above &mdash; many run both: the screensaver on the office PC, the Skylight by the fridge.</p>
+  </details>
+</section>
+
+<footer>
+  <span>by <a href="https://pactotech.com/" target="_blank" rel="noopener">Pacto Tech</a></span>
+  <span>free &amp; open source &middot; <a href="https://github.com/leecyrille/Windows-11-ICS-Calendar-Screensaver" target="_blank" rel="noopener">GitHub</a></span>
+  <span>As an Amazon Associate we earn from qualifying purchases.</span>
+</footer>
+
+</div>
+</body>
+</html>
