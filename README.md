@@ -3,8 +3,10 @@
 **Download & setup guide: [calendarsaver.com](https://calendarsaver.com/)**
 
 A Windows 11 screensaver that turns your monitor into a wall calendar: a full-month view
-aggregated from any number of Google Calendar (or other) ICS feeds, a task list, and a
-photo slideshow collage. Designed to be read from across the room.
+aggregated from any number of Google Calendar (or other) ICS feeds, plus a photo
+slideshow collage. Designed to be read from across the room.
+
+**Download & setup guide: [calendarsaver.com](https://calendarsaver.com/)**
 
 ![Calendar screensaver, dark theme](docs/calendar-dark.png)
 
@@ -21,8 +23,6 @@ Light theme (fixed, or on a schedule — e.g. light during the day, dark at nigh
   auto-scale of event text so everything fits.
 - Recurring events (RRULE, EXDATE, moved instances) expanded correctly; all times
   converted to local; all-day and multi-day events render as spanning bars.
-- **Task list** from VTODO components (overdue highlighted, undated at the bottom),
-  sorted by due date.
 - **Photo slideshow collage** from local folders (scanned recursively), tiles crossfade
   one at a time. No photos configured → the calendar takes the full width.
 - **Dark and light themes**, either fixed or scheduled (dark from HH:mm to HH:mm).
@@ -58,9 +58,9 @@ WebView2 profile, and `error.log` live in `%LOCALAPPDATA%\PactoTechCalendarSaver
 
 ### Notes
 
-- Google Calendar ICS exports do **not** include Google Tasks. The task panel shows
-  VTODO items from feeds that carry them (Nextcloud, Todoist ICS export, …). A Google
-  Tasks source can plug into the `ITaskSource` seam later without rework.
+- There is no task list. Google Calendar ICS exports do **not** include Google Tasks;
+  the code has a dormant VTODO renderer and an `ITaskSource` seam where a Google Tasks
+  integration could plug in later, but no shipped feed populates it.
 - Google's built-in Birthdays calendar usually has no secret iCal address; holiday
   calendars expose a *public* iCal address that works fine.
 - If photos live in Dropbox/OneDrive with "online-only" files, the first display of each
@@ -113,8 +113,8 @@ A .NET 8 WinForms host embeds a single WebView2 page that does all rendering.
 - **Photos are streamed by the host** through `WebResourceRequested` interception
   (`https://photosN/…`), which works regardless of page origin and needs no filesystem
   mapping.
-- Layout constants worth knowing: `TASK_PANEL_POSITION` in `app.js` switches the task
-  panel between the side column (default) and a bottom strip.
+- Layout constants worth knowing: `TASK_PANEL_POSITION` in `app.js` positions the
+  dormant VTODO panel (side column or bottom strip) if a feed ever supplies to-dos.
 
 Originally built from [calendar-screensaver-spec.md](calendar-screensaver-spec.md).
 
