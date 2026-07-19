@@ -1,5 +1,7 @@
 # PactoTech Calendar Saver
 
+**Download & setup guide: [calendarsaver.com](https://calendarsaver.com/)**
+
 A Windows 11 screensaver that turns your monitor into a wall calendar: a full-month view
 aggregated from any number of Google Calendar (or other) ICS feeds, a task list, and a
 photo slideshow collage. Designed to be read from across the room.
@@ -115,3 +117,12 @@ A .NET 8 WinForms host embeds a single WebView2 page that does all rendering.
   panel between the side column (default) and a bottom strip.
 
 Originally built from [calendar-screensaver-spec.md](calendar-screensaver-spec.md).
+
+## License
+
+MIT — free to use, modify, and redistribute **with attribution**: keep the copyright and
+license notice (see [LICENSE](LICENSE)) in any copy or substantial portion you distribute.
+
+Scope note: the license covers the software (`CalendarSaver/`, the built `.scr`, `docs/`).
+The website content in `site/` — copy, images, branding, and affiliate configuration — is
+© Pacto Tech and not licensed for reuse.

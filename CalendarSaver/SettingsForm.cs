@@ -218,6 +218,56 @@ public class SettingsForm : Form
         CancelButton = cancel;
         AcceptButton = save;
 
+        // --- footer: support links on the left, dialog buttons on the right ---
+        var supportRow = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Margin = new Padding(0),
+        };
+        supportRow.Controls.Add(MakeLink("☕ Enjoying Calendar Saver? Leave a tip",
+            "https://pactotech.com/products/calendar-saver-tip-jar"));
+        supportRow.Controls.Add(MakeLink("calendarsaver.com", "https://calendarsaver.com/"));
+
+        var skylightRow = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Margin = new Padding(0),
+        };
+        var skylightLabel = MakeInlineLabel("Prefer a dedicated wall display?  Skylight Calendar (affiliate):");
+        skylightLabel.ForeColor = SystemColors.ControlDarkDark;
+        skylightRow.Controls.Add(skylightLabel);
+        skylightRow.Controls.Add(MakeLink("10″", "https://www.amazon.com/dp/B0H37WG5F4?tag=flowerfrogmak-20"));
+        skylightRow.Controls.Add(MakeLink("15″", "https://www.amazon.com/dp/B0G5ZX9WSW?tag=flowerfrogmak-20"));
+        skylightRow.Controls.Add(MakeLink("27″", "https://www.amazon.com/dp/B0F1WYX8J6?tag=flowerfrogmak-20"));
+
+        var supportLinks = new TableLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Anchor = AnchorStyles.Left,
+            ColumnCount = 1,
+            Margin = new Padding(0),
+        };
+        supportLinks.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        supportLinks.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        supportLinks.Controls.Add(supportRow, 0, 0);
+        supportLinks.Controls.Add(skylightRow, 0, 1);
+
+        var footer = new TableLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Anchor = AnchorStyles.Left | AnchorStyles.Right,
+            ColumnCount = 2,
+            Margin = new Padding(0),
+        };
+        footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        footer.Controls.Add(supportLinks, 0, 0);
+        footer.Controls.Add(dialogButtons, 1, 0);
+
         // --- assemble rows ---
         void AddAuto(Control c) { root.RowStyles.Add(new RowStyle(SizeType.AutoSize)); root.Controls.Add(c); }
         void AddFill(Control c, float percent)
@@ -237,7 +287,7 @@ public class SettingsForm : Form
         AddAuto(intervals);
         AddAuto(themeRow);
         AddAuto(note);
-        AddAuto(dialogButtons);
+        AddAuto(footer);
 
         Controls.Add(root);
     }
@@ -295,6 +345,23 @@ public class SettingsForm : Form
         Anchor = AnchorStyles.Left,
         Margin = new Padding(0, 5, 6, 0),
     };
+
+    private static LinkLabel MakeLink(string text, string url)
+    {
+        var link = new LinkLabel
+        {
+            AutoSize = true,
+            Text = text,
+            Anchor = AnchorStyles.Left,
+            Margin = new Padding(0, 8, 18, 0),
+        };
+        link.LinkClicked += (_, _) =>
+        {
+            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch { /* no browser available — nothing to do */ }
+        };
+        return link;
+    }
 
     private static Button MakeButton(string text, EventHandler onClick)
     {
