@@ -101,16 +101,28 @@
   .skylight .intro b{ color:var(--ink) }
   .skycards{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px }
   .skycard{
-    display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; padding:16px 14px 14px;
-    background:var(--panel); border:1px solid var(--line); border-radius:12px; text-decoration:none; color:var(--ink);
-    transition:border-color .15s, transform .12s;
+    display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center; padding:16px 14px 13px;
+    background:#fff; border:1px solid var(--line2); border-radius:12px; text-decoration:none; color:var(--ink);
+    transition:border-color .15s, transform .12s, box-shadow .15s;
   }
-  .skycard:hover{ border-color:var(--sage); transform:translateY(-1px) }
+  .skycard:hover{ border-color:#FFA41C; transform:translateY(-1px); box-shadow:0 6px 18px -8px rgba(52,50,44,.25) }
   .skyart{ color:var(--sage-deep); height:84px; display:flex; align-items:flex-end }
-  .skycard b{ font-size:14px }
-  .skycard .why{ font-size:12px; color:var(--muted); line-height:1.45; min-height:3.6em }
-  .skycard em{ font-style:normal; color:var(--terra); font-weight:600; font-size:12px }
-  .disclosure{ margin:12px 0 0; font-size:11.5px; color:var(--muted); text-align:center }
+  .skycard .aztitle{ font-size:12.5px; font-weight:600; line-height:1.35; min-height:3.4em }
+  .skycard .why{ font-size:11.5px; color:var(--muted); line-height:1.45; min-height:3.2em }
+  .azstars{ display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px }
+  .azstars b{ color:var(--ink) }
+  .azstars .count{ color:var(--muted); font-size:11.5px }
+  .stars{ position:relative; display:inline-block; font-size:13px; line-height:1; color:#DCD6C8; letter-spacing:1px }
+  .stars .fill{ position:absolute; left:0; top:0; overflow:hidden; white-space:nowrap; color:#FFA41C; letter-spacing:1px }
+  .azbadge{ font-size:10.5px; font-weight:700; letter-spacing:.02em; background:#232F3E; color:#fff; border-radius:4px; padding:3px 7px }
+  .azbadge.new{ background:var(--sage-deep) }
+  .azbtn{
+    display:block; width:100%; text-align:center; background:#FFD814; color:#0F1111;
+    border:1px solid #FCD200; border-radius:999px; padding:8px 12px;
+    font-size:13px; font-weight:600; margin-top:auto;
+  }
+  .skycard:hover .azbtn{ background:#F7CA00 }
+  .disclosure{ margin:12px 0 0; font-size:11px; color:var(--muted); text-align:center; line-height:1.5 }
 
   .about{ margin-top:30px }
   .about details{ color:var(--muted); font-size:12.5px; line-height:1.55 }
@@ -202,24 +214,28 @@
     <div class="skycards">
       <a class="skycard" href="https://www.amazon.com/dp/B0H37WG5F4?tag=flowerfrogmak-20" target="_blank" rel="noopener sponsored">
         <span class="skyart"><svg width="64" height="56" viewBox="0 0 64 56" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="10" y="6" width="44" height="32" rx="3"/><path d="M10 14 h44" opacity=".5"/><path d="M17 21 h8 M30 21 h8 M17 28 h8 M30 28 h8 M43 21 h4 M43 28 h4" opacity=".4"/><path d="M24 38 l-6 12 h28 l-6-12" opacity=".8"/><path d="M14 50 h36"/></svg></span>
-        <b>Skylight Calendar Mini &middot; 10&Prime;</b>
+        <span class="aztitle">Skylight Calendar Mini &mdash; 10-Inch Digital Calendar Touchscreen Display</span>
+        <span class="azbadge new">New release</span>
         <span class="why">Counter-top size for kitchen corners, desks, and entryway tables &mdash; the affordable way in.</span>
-        <em>view on Amazon &rarr;</em>
+        <span class="azbtn">View on Amazon</span>
       </a>
       <a class="skycard" href="https://www.amazon.com/dp/B0G5ZX9WSW?tag=flowerfrogmak-20" target="_blank" rel="noopener sponsored">
         <span class="skyart"><svg width="88" height="66" viewBox="0 0 88 66" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="6" y="6" width="76" height="52" rx="4"/><path d="M6 18 h76" opacity=".5"/><path d="M14 27 h10 M30 27 h10 M46 27 h10 M62 27 h10 M14 36 h10 M30 36 h10 M46 36 h10 M62 36 h10 M14 45 h10 M30 45 h10" opacity=".4"/><circle cx="66" cy="45" r="2" fill="currentColor" stroke="none"/></svg></span>
-        <b>Skylight Calendar 2 &middot; 15&Prime;</b>
-        <span class="why">The family favorite and a Wirecutter pick &mdash; 4.4&#9733; from 6,500+ households. Wall mount included.</span>
-        <em>view on Amazon &rarr;</em>
+        <span class="aztitle">Skylight Calendar 2 &mdash; 15-Inch Full HD Touchscreen Digital Calendar</span>
+        <span class="azstars"><span class="stars"><span class="fill" style="width:88%">&#9733;&#9733;&#9733;&#9733;&#9733;</span>&#9733;&#9733;&#9733;&#9733;&#9733;</span> <b>4.4</b> <span class="count">(6,547)</span></span>
+        <span class="azbadge">#1 Best Seller &middot; Featured on Wirecutter</span>
+        <span class="why">The family favorite &mdash; interactive chore chart, wall mount included.</span>
+        <span class="azbtn">View on Amazon</span>
       </a>
       <a class="skycard" href="https://www.amazon.com/dp/B0F1WYX8J6?tag=flowerfrogmak-20" target="_blank" rel="noopener sponsored">
         <span class="skyart"><svg width="110" height="82" viewBox="0 0 110 82" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="5" y="5" width="100" height="72" rx="5"/><path d="M5 19 h100" opacity=".5"/><path d="M13 29 h12 M31 29 h12 M49 29 h12 M67 29 h12 M85 29 h12 M13 40 h12 M31 40 h12 M49 40 h12 M67 40 h12 M85 40 h12 M13 51 h12 M31 51 h12 M49 51 h12 M13 62 h12 M31 62 h12" opacity=".4"/><circle cx="88" cy="58" r="2.4" fill="currentColor" stroke="none"/></svg></span>
-        <b>Skylight Calendar Max &middot; 27&Prime;</b>
-        <span class="why">The full command center for busy households &mdash; mounts portrait or landscape, readable across the kitchen.</span>
-        <em>view on Amazon &rarr;</em>
+        <span class="aztitle">Skylight Calendar Max &mdash; 27-Inch Smart Digital Calendar &amp; Chore Chart</span>
+        <span class="azstars"><span class="stars"><span class="fill" style="width:92%">&#9733;&#9733;&#9733;&#9733;&#9733;</span>&#9733;&#9733;&#9733;&#9733;&#9733;</span> <b>4.6</b> <span class="count">(678)</span></span>
+        <span class="why">The full command center &mdash; mounts portrait or landscape, readable across the kitchen.</span>
+        <span class="azbtn">View on Amazon</span>
       </a>
     </div>
-    <p class="disclosure">As an Amazon Associate we earn from qualifying purchases.</p>
+    <p class="disclosure">Affiliate links &mdash; we may earn a commission at no extra cost to you. We are an independent site and not associated with the seller. As an Amazon Associate we earn from qualifying purchases. Ratings shown as of July 2026.</p>
   </div>
 </section>
 
