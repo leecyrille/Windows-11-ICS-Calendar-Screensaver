@@ -55,7 +55,13 @@
   }
   .btn:hover{ transform:translateY(-1px); filter:brightness(1.1) }
   .subnote{ margin:0; text-align:center; color:var(--muted); font-size:12px; line-height:1.5 }
+  .ssnote{
+    font-size:12px; line-height:1.5; color:var(--ink);
+    background:var(--sage-soft); border:1px solid var(--line); border-radius:9px; padding:9px 11px;
+  }
+  .ssnote b{ color:var(--sage-deep) }
   .ghlink{ text-align:center; font-size:12.5px }
+  kbd{ font:600 11.5px var(--sans); background:var(--panel); border:1px solid var(--line2); border-radius:5px; padding:1px 6px; color:var(--ink); white-space:nowrap }
   .shots{ border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow); background:var(--panel) }
   .shots img{ display:block; width:100%; height:auto }
   .shotrow{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px }
@@ -146,6 +152,7 @@
   <div class="heropanel">
     <a class="btn" href="https://github.com/leecyrille/Windows-11-ICS-Calendar-Screensaver/raw/main/PactoTechCalendarSaver.scr" rel="noopener">&#8681; Download Calendar Saver</a>
     <p class="subnote">free &amp; open source &middot; Windows 11 &middot; no account, no subscription<br>download &rarr; right-click &rarr; <b>Install</b></p>
+    <p class="ssnote">Windows will show a blue <b>&ldquo;Windows protected your PC&rdquo;</b> screen &mdash; that&rsquo;s normal for a free app without a paid signing certificate. Click <kbd>More info</kbd>, then <kbd>Run anyway</kbd> to continue. The full source is on GitHub if you&rsquo;d like to check it first.</p>
     <a class="ghlink" href="https://github.com/leecyrille/Windows-11-ICS-Calendar-Screensaver" target="_blank" rel="noopener">view source on GitHub</a>
     <a class="tipcard" href="https://pactotech.com/products/calendar-saver-tip-jar" target="_blank" rel="noopener">&#9749; Enjoying this free tool? <b>Leave a tip</b></a>
   </div>
@@ -168,7 +175,7 @@
 <section>
   <h2>Set up in three minutes</h2>
   <div class="steps">
-    <div class="step"><b>Install the screensaver</b><p>Download, right-click the <code>.scr</code> file, choose <b>Install</b>. Self-contained &mdash; nothing else to install.</p></div>
+    <div class="step"><b>Install the screensaver</b><p>Download, right-click the <code>.scr</code> file, choose <b>Install</b>. If Windows shows a blue &ldquo;protected your PC&rdquo; screen, click <kbd>More info</kbd> &rarr; <kbd>Run anyway</kbd> &mdash; expected for a free unsigned app. Self-contained; nothing else to install.</p></div>
     <div class="step"><b>Select it in Windows</b><p>In Screen Saver Settings pick <b>PactoTechCalendarSaver</b>, then open <b>Settings&hellip;</b> to add calendars and photos.</p></div>
     <div class="step"><b>Paste your calendar links</b><p>In Google Calendar: Settings and sharing &rarr; <b>Integrate calendar</b> &rarr; copy the <b>Secret address in iCal format</b>. The settings dialog walks you through it and live-tests every feed.</p></div>
   </div>
