@@ -64,6 +64,16 @@
   kbd{ font:600 11.5px var(--sans); background:var(--panel); border:1px solid var(--line2); border-radius:5px; padding:1px 6px; color:var(--ink); white-space:nowrap }
   .shots{ border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow); background:var(--panel) }
   .shots img{ display:block; width:100%; height:auto }
+  .shots img, .shotrow img{ cursor:zoom-in }
+  #lightbox{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(30,29,25,.9); z-index:100; cursor:zoom-out; padding:22px;
+  }
+  #lightbox.open{ display:flex }
+  #lightbox img{
+    max-width:min(1800px, 94vw); max-height:92vh; width:auto; height:auto;
+    border-radius:10px; box-shadow:0 24px 70px rgba(0,0,0,.55); background:var(--panel);
+  }
   .shotrow{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px }
   .shotrow figure{ margin:0; background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow) }
   .shotrow img{ display:block; width:100%; height:auto }
@@ -229,5 +239,27 @@
 </footer>
 
 </div>
+
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged screenshot"><img alt=""></div>
+<script>
+(function(){
+  var lb = document.getElementById('lightbox'), lbImg = lb.querySelector('img');
+  function open(img){
+    lbImg.src = img.currentSrc || img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close(){
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.shots img, .shotrow img').forEach(function(img){
+    img.addEventListener('click', function(){ open(img); });
+  });
+  lb.addEventListener('click', close);
+  window.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+})();
+</script>
 </body>
 </html>
