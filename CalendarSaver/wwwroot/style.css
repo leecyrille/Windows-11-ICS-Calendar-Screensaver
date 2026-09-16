@@ -129,9 +129,18 @@ html, body {
 #header-row {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: 1.5vw;
   margin-bottom: 0.7vh;
+}
+
+#clock {
+  font-size: 2.9vw;
+  font-weight: 190;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.015em;
+  flex: none;
 }
 
 #legend {
@@ -140,6 +149,7 @@ html, body {
   justify-content: flex-end;
   gap: 0.3vh 1.2vw;
   min-width: 0;
+  margin-left: auto;   /* pins the legend + clock to the right edge */
 }
 .legend-item {
   display: flex;
@@ -329,12 +339,6 @@ html, body {
 #status .err { color: var(--danger); }
 #status-right { display: flex; align-items: baseline; gap: 0.9em; }
 #clock-date { color: var(--faint); }
-#clock {
-  font-size: 1.05vw;
-  color: var(--dim);
-  font-weight: 480;
-  font-variant-numeric: tabular-nums;
-}
 
 /* ---------- tasks ---------- */
 
