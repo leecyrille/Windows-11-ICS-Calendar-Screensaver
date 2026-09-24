@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
@@ -23,18 +24,23 @@ public class ScreensaverForm : Form
     private bool _refreshing;
 
     private readonly bool _windowed;
+    private readonly RenderOptions? _render;
 
-    public ScreensaverForm(AppSettings settings, bool windowed = false)
+    public ScreensaverForm(AppSettings settings, bool windowed = false, RenderOptions? render = null)
     {
         _settings = settings;
-        _windowed = windowed;
+        _render = render;
+        _windowed = windowed || render != null;
         _feedService = new FeedService(settings);
 
         var bounds = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, 1920, 1080);
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.Manual;
-        Bounds = windowed ? new Rectangle(bounds.X + 80, bounds.Y + 80, 1920, 1080) : bounds;
-        TopMost = !windowed;
+        Bounds = render != null
+            // Off every monitor: it still renders, but nobody sees it.
+            ? new Rectangle(SystemInformation.VirtualScreen.Right + 200, SystemInformation.VirtualScreen.Top, render.Width, render.Height)
+            : windowed ? new Rectangle(bounds.X + 80, bounds.Y + 80, 1920, 1080) : bounds;
+        TopMost = !_windowed;
         ShowInTaskbar = false;
         BackColor = Color.FromArgb(13, 17, 23);
 
@@ -64,6 +70,19 @@ public class ScreensaverForm : Form
     private Point? _hostLastMouse;
     private double _hostMouseTravel;
 
+    // Render mode must never take focus from whatever the user is doing.
+    protected override bool ShowWithoutActivation => _render != null;
+
+    protected override CreateParams CreateParams
+    {
+        get
+        {
+            var cp = base.CreateParams;
+            if (_render != null) cp.ExStyle |= 0x80 /* WS_EX_TOOLWINDOW */ | 0x08000000 /* WS_EX_NOACTIVATE */;
+            return cp;
+        }
+    }
+
     private static void ExitFromHost(string reason)
     {
         AppPaths.Log("Exit requested: " + reason);
@@ -74,7 +93,7 @@ public class ScreensaverForm : Form
     {
         base.OnLoad(e);
         if (!_windowed) Cursor.Hide();
-        Activate();
+        if (_render == null) Activate();
         try
         {
             await InitWebViewAsync();
@@ -93,10 +112,21 @@ public class ScreensaverForm : Form
     {
         // The user data folder MUST be explicit: the .scr runs from System32,
         // and WebView2's default (next to the exe) would crash.
-        _environment = await CoreWebView2Environment.CreateAsync(null, AppPaths.WebView2UserData);
+        // Render mode gets its own profile and web folder so it can run while the real
+        // screensaver starts. Off-screen windows count as hidden to Chromium, which would
+        // stop painting them: turn that off.
+        var userData = _render != null ? AppPaths.WebView2UserData + "-render" : AppPaths.WebView2UserData;
+        var webRoot = _render != null ? AppPaths.WebRoot + "-render" : AppPaths.WebRoot;
+        Directory.CreateDirectory(webRoot);
+        var options = _render != null
+            ? new CoreWebView2EnvironmentOptions("--disable-features=CalculateNativeWinOcclusion --disable-backgrounding-occluded-windows --disable-renderer-backgrounding")
+            : null;
+        _environment = await CoreWebView2Environment.CreateAsync(null, userData, options);
         var environment = _environment;
         AppPaths.Log($"WebView2 runtime {environment.BrowserVersionString}");
         await _webView.EnsureCoreWebView2Async(environment);
+        // One CSS pixel per image pixel, whatever the display scaling.
+        if (_render != null) _webView.ZoomFactor = 96.0 / DeviceDpi;
 
         var core = _webView.CoreWebView2;
         var s = core.Settings;
@@ -111,9 +141,9 @@ public class ScreensaverForm : Form
         s.AreDevToolsEnabled = false;
 #endif
 
-        WebAssets.ExtractTo(AppPaths.WebRoot);
-        AppPaths.Log($"Extracted web assets to {AppPaths.WebRoot}");
-        core.SetVirtualHostNameToFolderMapping("app", AppPaths.WebRoot, CoreWebView2HostResourceAccessKind.Allow);
+        WebAssets.ExtractTo(webRoot);
+        AppPaths.Log($"Extracted web assets to {webRoot}");
+        core.SetVirtualHostNameToFolderMapping("app", webRoot, CoreWebView2HostResourceAccessKind.Allow);
 
         // Photos are served by intercepting https://photosN/... requests and streaming the
         // file ourselves. Unlike SetVirtualHostNameToFolderMapping this cannot be broken by
@@ -124,7 +154,7 @@ public class ScreensaverForm : Form
         core.WebMessageReceived += OnWebMessageReceived;
         core.NavigationCompleted += (_, args) =>
         {
-            _webView.Focus(); // keyboard must land in the page
+            if (_render == null) _webView.Focus(); // keyboard must land in the page
             if (args.IsSuccess) return;
             AppPaths.Log($"Navigation failed: {args.WebErrorStatus}" + (_fileFallback ? " (already in fallback)" : "; retrying via file://"));
             if (!_fileFallback)
@@ -132,11 +162,11 @@ public class ScreensaverForm : Form
                 // Virtual-host mapping can be unavailable (e.g. blocked by security software);
                 // the extracted page works over plain file:// too, with file:// photo URLs.
                 _fileFallback = true;
-                core.Navigate(new Uri(Path.Combine(AppPaths.WebRoot, "index.html")).AbsoluteUri);
+                core.Navigate(new Uri(Path.Combine(webRoot, "index.html")).AbsoluteUri);
             }
         };
         core.Navigate("https://app/index.html");
-        _webView.Focus();
+        if (_render == null) _webView.Focus();
     }
 
     /// <summary>Streams https://photosN/rel/path.jpg requests from the configured folders.</summary>
@@ -214,12 +244,71 @@ public class ScreensaverForm : Form
             _photos = _photoService.Scan(_settings.PhotoFolders);
             PushPayload();
             StartTimers();
+            if (_render != null) _ = CaptureLoopAsync();
             await RefreshAsync();
         }
         catch (Exception ex)
         {
             AppPaths.Log("Startup failed: " + ex);
         }
+    }
+
+    /// <summary>Render mode: save the page as an image just after every interval boundary
+    /// (so the clock reads right), until the parent process goes away.</summary>
+    private async Task CaptureLoopAsync()
+    {
+        var render = _render!;
+        var watchdog = new System.Windows.Forms.Timer { Interval = 5000 };
+        watchdog.Tick += (_, _) =>
+        {
+            if (render.ParentPid is int pid && !ProcessAlive(pid))
+            {
+                AppPaths.Log($"Render: parent {pid} is gone; exiting");
+                ExitSaver();
+            }
+        };
+        watchdog.Start();
+
+        await Task.Delay(6000); // first paint, fonts, and the staggered photo fill
+        while (true)
+        {
+            await CaptureAsync(render);
+            var every = Math.Max(10, render.EverySeconds);
+            var secs = DateTime.Now.TimeOfDay.TotalSeconds;
+            var next = (Math.Floor(secs / every) + 1) * every + 1;
+            await Task.Delay(TimeSpan.FromSeconds(next - secs));
+        }
+    }
+
+    private async Task CaptureAsync(RenderOptions render)
+    {
+        var core = _webView.CoreWebView2;
+        if (core == null) return;
+        try
+        {
+            await core.ExecuteScriptAsync("typeof updateClock === 'function' && updateClock()");
+            var jpeg = !render.OutPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase);
+            var tmp = render.OutPath + ".tmp";
+            using (var fs = File.Create(tmp))
+            {
+                await core.CapturePreviewAsync(jpeg ? CoreWebView2CapturePreviewImageFormat.Jpeg : CoreWebView2CapturePreviewImageFormat.Png, fs);
+            }
+            for (var attempt = 0; ; attempt++)
+            {
+                try { File.Move(tmp, render.OutPath, overwrite: true); break; }
+                catch (IOException) when (attempt < 5) { await Task.Delay(200); } // reader has it open
+            }
+        }
+        catch (Exception ex)
+        {
+            AppPaths.Log("Render capture failed: " + ex.Message);
+        }
+    }
+
+    private static bool ProcessAlive(int pid)
+    {
+        try { return !Process.GetProcessById(pid).HasExited; }
+        catch { return false; }
     }
 
     private void StartTimers()
@@ -301,6 +390,9 @@ public class ScreensaverForm : Form
         Application.Exit();
     }
 }
+
+/// <summary>Render mode (/p render): where to save the image, its size, how often, and which process to outlive.</summary>
+public record RenderOptions(string OutPath, int Width, int Height, int EverySeconds, int? ParentPid);
 
 /// <summary>Plain black topmost cover for each non-primary monitor. Handles its own
 /// input (no WebView here) with the same 10px mouse-jitter tolerance.</summary>

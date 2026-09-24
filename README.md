@@ -87,6 +87,13 @@ Desktop Runtime installed system-wide, `--self-contained false` shrinks it to ~2
 - `PactoTechCalendarSaver.exe /w` — run in a 1920×1080 window that ignores input-exit
   (for screenshots and development)
 - `PactoTechCalendarSaver.exe /c` — settings dialog
+- `PactoTechCalendarSaver.exe /p render out.jpg [--size 1920x1080] [--every 60] [--parent PID]` —
+  draw the calendar in an invisible off-screen window and save it as a picture every interval
+  (just after the minute, so the clock is right) until the parent process exits. This is how
+  [Unofficial Google Home Volume Sync](https://github.com/leecyrille/GoogleHomeVolumeSync) shows the
+  calendar on Roku TVs, Nest Hubs and Chromecasts, and as a Roku screensaver. It rides on `/p` so
+  older versions, which quietly exit on `/p`, never open their settings window instead. Start it
+  directly (CreateProcess), not through the shell, which runs `.scr` files with `/S`
 - `PactoTechCalendarSaver.exe /d [out.json]` — fetch feeds per current settings and dump
   the JSON payload the page receives (feed URLs may also be local `.ics` paths — handy
   for testing)

@@ -25,6 +25,10 @@ internal static class Program
                     break;
 
                 case "/p": // preview inside the tiny Settings-dialog monitor: not supported, exit quietly
+                    // "/p render ..." draws the calendar off-screen for TVs (see RunRender). It rides on
+                    // /p so older versions, which exit quietly here, never pop up their settings window.
+                    if (args.Length > 2 && args[1].Equals("render", StringComparison.OrdinalIgnoreCase))
+                        RunRender(args[1..]);
                     break;
 
                 case "/d": // debug helper: dump the JSON payload the page would receive
@@ -54,6 +58,40 @@ internal static class Program
             new BlackoutForm(screen).Show();
         }
         Application.Run(main);
+    }
+
+    /// <summary>/p render out.jpg [--size 1920x1080] [--every 60] [--parent PID]: saves the calendar
+    /// as a picture every interval from an invisible window, until the parent process exits.
+    /// Used by Unofficial Google Home Volume Sync to show the calendar on TVs.</summary>
+    private static void RunRender(string[] args)
+    {
+        if (args.Length < 2) return;
+        int width = 1920, height = 1080, every = 60;
+        int? parent = null;
+        for (var i = 2; i + 1 < args.Length; i += 2)
+        {
+            var value = args[i + 1];
+            switch (args[i].ToLowerInvariant())
+            {
+                case "--size":
+                    var wh = value.ToLowerInvariant().Split('x');
+                    if (wh.Length == 2 && int.TryParse(wh[0], out var w) && int.TryParse(wh[1], out var h))
+                    {
+                        width = Math.Clamp(w, 320, 7680);
+                        height = Math.Clamp(h, 240, 4320);
+                    }
+                    break;
+                case "--every":
+                    if (int.TryParse(value, out var n)) every = Math.Clamp(n, 10, 3600);
+                    break;
+                case "--parent":
+                    if (int.TryParse(value, out var pid)) parent = pid;
+                    break;
+            }
+        }
+        var outPath = Path.GetFullPath(args[1]);
+        AppPaths.Log($"Render: {width}x{height} every {every}s to {outPath}");
+        Application.Run(new ScreensaverForm(AppSettings.Load(), render: new RenderOptions(outPath, width, height, every, parent)));
     }
 
     private static void DumpPayload(string outPath)
