@@ -28,8 +28,9 @@ Light theme (fixed, or on a schedule — e.g. light during the day, dark at nigh
 - **Dark and light themes**, either fixed or scheduled (dark from HH:mm to HH:mm).
 - Feeds refresh on an interval and are cached on disk — an offline start or a dead URL
   still shows the last good data, with a note in the footer.
-- Automatic month rollover at midnight. A big clock in the header; date and status in a
-  slim footer.
+- Automatic month rollover at midnight. A big clock with the day and date fills the top of
+  the photo column, readable from across the room (in the header when there are no photos);
+  date and status in a slim footer.
 - Exits on any keypress or real mouse movement (>10 px cumulative — jitter-proof).
 
 ## Install

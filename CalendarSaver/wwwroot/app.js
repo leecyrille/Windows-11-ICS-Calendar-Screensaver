@@ -323,10 +323,17 @@ function renderStatus() {
 
 function updateClock() {
   const now = new Date();
-  document.getElementById('clock').textContent =
-    `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  document.getElementById('clock').textContent = time;
   document.getElementById('clock-date').textContent =
     now.toLocaleString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  // The big clock at the top of the photo column (see createSlideshow).
+  const big = document.getElementById('big-clock-time');
+  if (big) {
+    big.textContent = time;
+    document.getElementById('big-clock-day').textContent = now.toLocaleString(undefined, { weekday: 'long' });
+    document.getElementById('big-clock-date').textContent = now.toLocaleString(undefined, { month: 'long', day: 'numeric' });
+  }
 }
 
 setInterval(() => {
@@ -379,7 +386,19 @@ function createSlideshow(container) {
     container.textContent = '';
     tiles = [];
     nextTile = 0;
-    const count = pool.length >= 12 ? 4 : pool.length >= 4 ? 3 : Math.min(pool.length, 2);
+    let count = pool.length >= 12 ? 4 : pool.length >= 4 ? 3 : Math.min(pool.length, 2);
+    if (count > 0) {
+      // A big clock takes the top photo's place, readable from across the room.
+      // (With no photos the column is hidden and the header clock shows instead.)
+      const clock = el('div', 'tile clock-tile');
+      clock.style.setProperty('--grow', 1.05);
+      const time = el('div', 'big-time'); time.id = 'big-clock-time';
+      const day = el('div', 'big-day'); day.id = 'big-clock-day';
+      const date = el('div', 'big-date'); date.id = 'big-clock-date';
+      clock.append(time, day, date);
+      container.append(clock);
+      count = Math.max(1, count - 1);
+    }
     const grows = shuffle([1.25, 0.9, 1.1, 0.8]).slice(0, count);
     for (let i = 0; i < count; i++) {
       const tileEl = el('div', 'tile');
@@ -390,6 +409,7 @@ function createSlideshow(container) {
       tiles.push({ el: tileEl, imgs: [a, b], active: 0, current: null });
     }
     tiles.forEach((tile, i) => setTimeout(() => swap(tile), 350 * i)); // staggered first fill
+    updateClock();
   }
 
   function restartTimer() {

@@ -431,3 +431,36 @@ html, body {
   transition: opacity 1.5s ease;
 }
 .tile img.show { opacity: 1; }
+
+/* ---------- big clock (top of the photo column) ---------- */
+
+#root:not(.no-photos) #clock { display: none; }   /* the photo column carries the clock */
+
+.clock-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-lift);
+  border-bottom: 1px solid var(--line);
+}
+.big-time {
+  font-size: calc(var(--photos-w) * 0.305);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.big-day {
+  margin-top: 1.4vh;
+  font-size: calc(var(--photos-w) * 0.0875);
+  font-weight: 560;
+  color: var(--text);
+}
+.big-date {
+  margin-top: 0.3vh;
+  font-size: calc(var(--photos-w) * 0.0725);
+  font-weight: 420;
+  color: var(--dim);
+}
