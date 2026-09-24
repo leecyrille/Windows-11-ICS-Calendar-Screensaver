@@ -331,7 +331,7 @@ public class ScreensaverForm : Form
         _themeTimer = new System.Windows.Forms.Timer { Interval = 60_000 };
         _themeTimer.Tick += (_, _) =>
         {
-            if (_settings.EffectiveTheme(DateTime.Now) != _lastTheme) PushPayload();
+            if (CurrentTheme() != _lastTheme) PushPayload();
         };
         _themeTimer.Start();
 
@@ -377,12 +377,17 @@ public class ScreensaverForm : Form
     {
         if (_webView.CoreWebView2 == null || _lastFeeds == null) return;
         var payload = PayloadBuilder.Build(_settings, _lastFeeds, _photos, DateTime.Now);
+        payload.Theme = CurrentTheme();
         _lastTheme = payload.Theme;
         AppPaths.Log($"Push: {payload.Events.Count} events, {payload.Tasks.Count} tasks, " +
                      $"{payload.Photos.Count} photos, refresh={payload.LastRefresh ?? "null"}, " +
                      $"form={Bounds.Width}x{Bounds.Height}, dpi={DeviceDpi}");
         _webView.CoreWebView2.PostWebMessageAsJson(PayloadBuilder.ToJson(payload));
     }
+
+    /// <summary>Render mode can fix the theme (--theme dark|light); otherwise the saver's own setting.</summary>
+    private string CurrentTheme() =>
+        _render?.Theme is "dark" or "light" ? _render.Theme : _settings.EffectiveTheme(DateTime.Now);
 
     private static void ExitSaver()
     {
@@ -392,7 +397,7 @@ public class ScreensaverForm : Form
 }
 
 /// <summary>Render mode (/p render): where to save the image, its size, how often, and which process to outlive.</summary>
-public record RenderOptions(string OutPath, int Width, int Height, int EverySeconds, int? ParentPid);
+public record RenderOptions(string OutPath, int Width, int Height, int EverySeconds, int? ParentPid, string? Theme = null);
 
 /// <summary>Plain black topmost cover for each non-primary monitor. Handles its own
 /// input (no WebView here) with the same 10px mouse-jitter tolerance.</summary>

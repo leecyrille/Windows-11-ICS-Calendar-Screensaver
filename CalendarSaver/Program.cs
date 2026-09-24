@@ -60,7 +60,7 @@ internal static class Program
         Application.Run(main);
     }
 
-    /// <summary>/p render out.jpg [--size 1920x1080] [--every 60] [--parent PID]: saves the calendar
+    /// <summary>/p render out.jpg [--size 1920x1080] [--every 60] [--theme dark|light] [--parent PID]: saves the calendar
     /// as a picture every interval from an invisible window, until the parent process exits.
     /// Used by Unofficial Google Home Volume Sync to show the calendar on TVs.</summary>
     private static void RunRender(string[] args)
@@ -68,6 +68,7 @@ internal static class Program
         if (args.Length < 2) return;
         int width = 1920, height = 1080, every = 60;
         int? parent = null;
+        string? theme = null;
         for (var i = 2; i + 1 < args.Length; i += 2)
         {
             var value = args[i + 1];
@@ -84,6 +85,9 @@ internal static class Program
                 case "--every":
                     if (int.TryParse(value, out var n)) every = Math.Clamp(n, 10, 3600);
                     break;
+                case "--theme": // dark | light; default follows the saver's settings
+                    theme = value.ToLowerInvariant() is "dark" or "light" ? value.ToLowerInvariant() : null;
+                    break;
                 case "--parent":
                     if (int.TryParse(value, out var pid)) parent = pid;
                     break;
@@ -91,7 +95,7 @@ internal static class Program
         }
         var outPath = Path.GetFullPath(args[1]);
         AppPaths.Log($"Render: {width}x{height} every {every}s to {outPath}");
-        Application.Run(new ScreensaverForm(AppSettings.Load(), render: new RenderOptions(outPath, width, height, every, parent)));
+        Application.Run(new ScreensaverForm(AppSettings.Load(), render: new RenderOptions(outPath, width, height, every, parent, theme)));
     }
 
     private static void DumpPayload(string outPath)
